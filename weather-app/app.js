@@ -17,5 +17,4 @@ request({url: urlLocation, json: true}, (rej, res) => {
     const latitude = res.body.data[0].latitude;
     const longitude = res.body.data[0].longitude;
     console.log(latitude)
-    console.log(longitude)
 })
