@@ -1,5 +1,6 @@
 const request = require('request');
 const geoCode = require('./utils/geocode') 
+const currWeather = require('./utils/currWeather')
 
 
 // const query = '&query=Montevideo'
@@ -13,16 +14,16 @@ const geoCode = require('./utils/geocode')
 //     console.log(`The actual temperature in ${city} is ${temperature} Celsius degrees`)
 // })
 
-// const urlLocation = `http://api.positionstack.com/v1/forward?access_key=1da359a29d86714b7a5d88a5f8cf3e29${query}`
-// request({url: urlLocation, json: true}, (rej, res) => {
 
-//     const latitude = res.body.data[0].latitude;
-//     const longitude = res.body.data[0].longitude;
-//     console.log(latitude)
-// })
 
 geoCode('Montevideo', (error, data) => {
     console.log(error)
     console.log(data)
     console.log(`The precise location for ${data.location} is longitude: ${data.longitude} and latitude: ${data.latitude}`)
 });
+
+currWeather(-34.83346, 0, (error, data) => {
+    console.log(error);
+    console.log(data)
+    console.log(`The current temperature in ${data.city} is ${data.temperature} celsius degrees`)
+})  

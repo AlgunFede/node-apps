@@ -8,7 +8,7 @@ const geoCode = (address, callback) => {
 
         if (rej) {
             callback('Unable to connect to server', undefined)
-        } else if (res.body.data.length === 0) {
+        } else if (res.body.success === false) {
             callback('Can\'t find the location', undefined)
         } else {
             callback(undefined, {
@@ -20,7 +20,5 @@ const geoCode = (address, callback) => {
 
     })
 };
-
-
 
 module.exports = geoCode;
