@@ -9,20 +9,19 @@ if(!location) {
     console.log('Ups! Not as spected. Please, provide a location!')
 } else {
     
-    geoCode(location, (error, data) => {
+    geoCode(location, (error, { latitude, longitude } = {}) => {
     
         if (error) {
             return console.log(error)
         }
-    
-        
-        currWeather(data.latitude, data.longitude, (error, forecastData) => {
+
+        currWeather(latitude, longitude, (error, { city, temperature }) => {
     
             if(error) {
                 return console.log(error)
             }
             
-            console.log(`The current weather in ${forecastData.city} is ${forecastData.temperature} Celsius degrees`)
+            console.log(`The current weather in ${city} is ${temperature} Celsius degrees`)
         })  
     });
     
