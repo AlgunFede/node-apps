@@ -3,16 +3,28 @@ const geoCode = require('./utils/geocode')
 const currWeather = require('./utils/currWeather')
 
 
+const location = process.argv[2];
 
-geoCode('Montevideo', (error, data) => {
-    console.log(error)
-    console.log(data)
-    console.log(`The precise location for ${data.location} is longitude: ${data.longitude} and latitude: ${data.latitude}`)
+if(!location) {
+    console.log('Ups! Not as spected. Please, provide a location!')
+} else {
     
+    geoCode(location, (error, data) => {
+    
+        if (error) {
+            return console.log(error)
+        }
+    
+        
+        currWeather(data.latitude, data.longitude, (error, forecastData) => {
+    
+            if(error) {
+                return console.log(error)
+            }
+            
+            console.log(`The current weather in ${forecastData.city} is ${forecastData.temperature} Celsius degrees`)
+        })  
+    });
+    
+}
 
-    
-    currWeather(-34.83346, -56.16735, (error, data) => {
-        console.log(error);
-        console.log(data)
-    })  
-});
