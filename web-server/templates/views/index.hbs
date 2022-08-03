@@ -7,13 +7,23 @@
     <title>Weather</title>
     <link rel="icon" href="/img/favicon.ico">
     <link rel="stylesheet" href="./css/styles.css"> 
-    <script src="./js/script.js"></script>
 </head>
 <body>
 
     <div class="main-content">
         {{>header}}
+
+        <form action="">
+            <input placeholder="Type your place" id="input">
+            <button>Search</button>
+        </form>
+
+        <p id="msg-1"></p>
+        <p id="msg-2"></p>
     </div>
+
     {{>footer}}
+    
+    <script src="./js/script.js"></script>
 </body>
 </html>

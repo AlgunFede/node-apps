@@ -16,6 +16,11 @@ body {
 }
 
 
+.user {
+    max-width: 40%;
+    
+}
+
 footer {
     color: #888888;
     border-top: 1px solid #eeeeee;
@@ -38,4 +43,36 @@ header a {
     color: #888888;
     margin-right: 16px;
     text-decoration: none;
+}
+header a:hover {
+    color: #5e5d5d;
+    transition: .7  s;
+    margin-bottom: 5px;
+    text-decoration: none;  
+}
+
+input {
+    border: 1px solid #cccccc;
+    box-shadow: none;
+    padding: 8px;
+    outline: none;
+    border-radius: 5px;
+
+}
+
+input:focus {
+    border: 1px solid #333333;
+    transition: 0.8s;
+}
+
+button {
+    background-color: #888888;
+    border: 1px solid #888888;
+    padding: 8px; 
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+button:focus {
+    background-color: #666666;
 }
