@@ -1,6 +1,9 @@
 const path = require('path');
 const hbs = require('hbs');
 const express = require('express');
+const currWeather = require('./utils/currWeather');
+const geocode = require('./utils/geocode');
+
 const app = express();
 
 const port = 3000;
@@ -51,6 +54,35 @@ app.get('/help/*', (req, res) => {
         title: '404',
         errMsg: 'Cannot found help article'
     })
+})
+
+//Testing query string
+
+app.get('/weather', (req, res) => {
+
+    if(!req.query.address) {
+        return res.send({
+            error: 'Address need to be provided'
+        })
+    }
+
+    geocode(req.query.address, (error, { latitude, longitude } = {} ) => {
+        if(error) {
+            return res.send({ error })
+        }
+
+        currWeather(latitude, longitude, (error, forecastData ) => {
+            if(error) {
+                return res.send({ error })
+            }
+
+            res.send({
+                forecastData,
+                address: req.query.address
+            })
+        })
+    })
+
 })
 
 app.get('*', (req, res) => {
