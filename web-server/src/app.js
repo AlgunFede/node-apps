@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 
-// Defined paths for static files
+// Paths for static files
 const publicPathRoute = path.join(__dirname, '../public');
 const partialPath = path.join(__dirname, '../templates/partials');
 const viewPath = path.join(__dirname, '../templates/views');
