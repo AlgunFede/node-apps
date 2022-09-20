@@ -1,31 +1,69 @@
 const express = require('express');
 const User = require('../models/user');
 const router = express.Router();
+const auth = require('../middlewares/auth');
 
-
-// Handleing users requests
 
 // Create user
-router.post('/users', async (req, res) => {
-    const usr = new User(req.body)
+router.post('/users/me', async (req, res) => {
+    const user = new User(req.body)
     
     try {
-        await usr.save()
-        res.send(usr)
+        await user.save();
+        const token = await user.generateAuthToken();
+        res.status(201).send( {user, token} );
     } catch (e) {
         res.status(400).send(e)
+    }
+});
+
+// Login user
+router.post('/users/login', async (req, res) => {
+
+    const email = req.body.email;
+    const password = req.body.password;
+    
+    try {
+        const user = await User.findByCredentials(email, password);
+        const token = await user.generateAuthToken();
+        res.send({ user: user.getPublicData(), token })
+
+    } catch(e) {
+        res.status(400).send({ error: e });
+    } 
+
+})
+
+// Logout user
+router.post('/users/logout', auth, async (req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter((token) => {
+            return token.token !== req.token
+        })
+        await req.user.save();
+        res.send()
+    } catch(e) {
+        res.status(500).send()
+    }
+});
+
+// Logout all users
+
+router.post('/users/logoutAll', auth, async (req, res) => {
+    try {
+        req.user.tokens = [];
+        await req.user.save();
+        res.send({ success: 'Devices succesfully logouted' })
+
+    } catch(e) {
+        res.status(500).send()
     }
 })
 
 // Getting all users
-router.get('/users', async (req, res) => {
-    
-    try {
-        const users = await User.find({});
-        res.send(users)
-    } catch (e) {
-        res.status(400).send(e)
-    }
+router.get('/users/me', auth, async (req, res) => {
+
+    res.send(req.user)
 
 })
 
@@ -65,7 +103,6 @@ router.patch('/users/:id', async (req, res) => {
         // const user = await User.findByIdAndUpdate(_id, req.body, validation)
         
         const user = await User.findById(_id)
-        
         changes.forEach((change) => {
             user[change] = req.body[change]
         })

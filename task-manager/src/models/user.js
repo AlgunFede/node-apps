@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken')
 
 const userSchema = mongoose.Schema({
     name: {
@@ -23,6 +25,7 @@ const userSchema = mongoose.Schema({
         required: true,
         trim: true,
         lowercase: true,
+        unique: true,
         validate(value) {
             if(!validator.isEmail(value)) {
                 throw new Error('Incorrect format email')
@@ -37,13 +40,65 @@ const userSchema = mongoose.Schema({
                 throw new Error('Age must be positive')
             }
         }
+    },
+    tokens: [{
+        token: {
+            type: String,
+            require: true
+        }
+    }]
+});
+
+// Method to return public data
+
+userSchema.methods.getPublicData = function() {
+    const user = this;
+    const userObject = user.toObject();
+    
+    delete userObject.password;
+    delete userObject.tokens;
+    return userObject;
+    
+}
+// Method to create Auth Token
+
+userSchema.methods.generateAuthToken = async function() {
+    const user = this;
+
+    const token = jwt.sign( { _id: user._id.toString() }, 'test');
+    user.tokens = user.tokens.concat({ token });
+
+    await user.save();
+    return token;
+}
+
+
+// Creating findByCredentials method. Identify user and check coincidence
+userSchema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne( { email } )
+
+    if (!user) {
+        throw new Error('Unable to login')
     }
-})
+    
+    const isMatch = await bcrypt.compare(password, user.password)
 
-userSchema.pre('save', function(next) {
+    if (!isMatch) {
+        throw new Error('Unable to login')
+    }
 
-    console.log('Just before saving!')
+    return user
+}
 
+
+userSchema.pre('save', async function(next) {
+    const user = this;
+
+    if (user.isModified('password')) {
+        
+        user.password = await bcrypt.hash(user.password, 8)
+
+    }
     next()
 
 })

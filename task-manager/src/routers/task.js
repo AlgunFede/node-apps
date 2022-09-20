@@ -62,8 +62,14 @@ router.patch('/task/:id', async (req, res) => {
     }
 
     try {
-        const task = await Task.findByIdAndUpdate(_id, req.body, validation)
-        
+        const task = await Task.findById(_id);
+
+        changes.forEach((change) => {
+            task[change] = req.body[change]
+        })
+
+        await task.save()
+
         if(!task) {
             return res.status(404).send({error: 'Failed! Task doesn\'t finded'})
         }
