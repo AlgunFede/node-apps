@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const Task = require('./task');
 
 const userSchema = mongoose.Schema({
     name: {
@@ -49,9 +50,17 @@ const userSchema = mongoose.Schema({
     }]
 });
 
+// Virtual propertie. No actual data stored in DB, is a relationship between 2 entities.
+
+userSchema.virtual('tasks', {
+    ref: 'Tasks',
+    localField: '_id',
+    foreignField: 'owner'
+})
+
 // Method to return public data
 
-userSchema.methods.getPublicData = function() {
+userSchema.methods.toJSON = function() {
     const user = this;
     const userObject = user.toObject();
     
@@ -90,7 +99,7 @@ userSchema.statics.findByCredentials = async (email, password) => {
     return user
 }
 
-
+// Middleware hash password before savin it, in case  it has been changed
 userSchema.pre('save', async function(next) {
     const user = this;
 
@@ -100,7 +109,14 @@ userSchema.pre('save', async function(next) {
 
     }
     next()
+})
 
+userSchema.pre('remove', async function(next) {
+    const user = this;
+
+    await Task.deleteMany( { owner: user._id} )
+    console.log('Deleting notes from user')
+    next()
 })
 
 const User = mongoose.model('User', userSchema);

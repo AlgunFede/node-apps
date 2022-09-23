@@ -26,10 +26,10 @@ router.post('/users/login', async (req, res) => {
     try {
         const user = await User.findByCredentials(email, password);
         const token = await user.generateAuthToken();
-        res.send({ user: user.getPublicData(), token })
+        res.send({ user, token })
 
     } catch(e) {
-        res.status(400).send({ error: e });
+        res.status(400).send({ error: "User not found" });
     } 
 
 })
@@ -41,13 +41,13 @@ router.post('/users/logout', auth, async (req, res) => {
             return token.token !== req.token
         })
         await req.user.save();
-        res.send()
+        res.send({ success: 'User logout succesfully' })
     } catch(e) {
         res.status(500).send()
     }
 });
 
-// Logout all users
+// Logout all devices
 
 router.post('/users/logoutAll', auth, async (req, res) => {
     try {
@@ -62,31 +62,14 @@ router.post('/users/logoutAll', auth, async (req, res) => {
 
 // Getting all users
 router.get('/users/me', auth, async (req, res) => {
-
+    
     res.send(req.user)
 
 })
 
-// Getting user by ID
-router.get('/users/:id', async (req, res) => {
-    const _id = req.params.id; 
-
-    try {
-        const user = await User.findById(_id)
-        
-        if (!user) {
-            return res.status(404).send()
-        }
-        res.send(user)
-    } catch(e) {
-        res.status(400).send(e);
-    }
-    
-})
-
 // Edit user information
-router.patch('/users/:id', async (req, res) => {
-    const _id = req.params.id;
+router.patch('/users/me', auth, async (req, res) => {
+    const _id = req.user._id;
     const validation = { new: true, runValidators: true};
 
     //Validate if property exist
@@ -106,12 +89,7 @@ router.patch('/users/:id', async (req, res) => {
         changes.forEach((change) => {
             user[change] = req.body[change]
         })
-
         await user.save()
-
-        if(!user) {
-            return res.status(404).send({ error: 'Can not find user'})
-        }
         res.send(user)
 
     } catch (e) {
@@ -122,17 +100,12 @@ router.patch('/users/:id', async (req, res) => {
 
 // Delete user
 
-router.delete('/users/:id', async (req, res) => {
-    const _id = req.params.id;
+router.delete('/users/me', auth, async (req, res) => {
+    const _id = req.user._id;
 
     try {
-
-        const user = await User.findByIdAndDelete(_id)
-
-        if(!user) {
-            return res.status(404).send( { error: 'Can not find the user'} )
-        }
-        res.send(user)
+        req.user.remove()
+        res.send(req.user)
 
     } catch(e) {
         res.status(500).send(e)
