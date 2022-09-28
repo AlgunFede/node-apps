@@ -47,7 +47,12 @@ const userSchema = mongoose.Schema({
             type: String,
             require: true
         }
-    }]
+    }],
+    avatar: {
+        type: Buffer
+    }
+}, {
+    timestamps: true
 });
 
 // Virtual propertie. No actual data stored in DB, is a relationship between 2 entities.
@@ -66,15 +71,16 @@ userSchema.methods.toJSON = function() {
     
     delete userObject.password;
     delete userObject.tokens;
+    delete userObject.avatar;
     return userObject;
     
 }
-// Method to create Auth Token
+// Method to create AuthToken
 
 userSchema.methods.generateAuthToken = async function() {
     const user = this;
 
-    const token = jwt.sign( { _id: user._id.toString() }, 'test');
+    const token = jwt.sign( { _id: user._id.toString() }, process.env.SECRET_JWT_KEY);
     user.tokens = user.tokens.concat({ token });
 
     await user.save();
@@ -99,7 +105,7 @@ userSchema.statics.findByCredentials = async (email, password) => {
     return user
 }
 
-// Middleware hash password before savin it, in case  it has been changed
+// Middleware hash password before saving it, in case it has been changed
 userSchema.pre('save', async function(next) {
     const user = this;
 
@@ -111,11 +117,11 @@ userSchema.pre('save', async function(next) {
     next()
 })
 
+// Delete it tasks in case user delete account
 userSchema.pre('remove', async function(next) {
     const user = this;
 
     await Task.deleteMany( { owner: user._id} )
-    console.log('Deleting notes from user')
     next()
 })
 
